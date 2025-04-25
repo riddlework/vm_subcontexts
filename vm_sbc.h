@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdint.h>
+#include <assert.h>
 
 // buffer size for reading /proc/self/maps
 #define BUFSZ 16000

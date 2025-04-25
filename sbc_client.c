@@ -206,7 +206,7 @@ int call_subcontext_function(int func_index, int fd) {
     
     // ERROR CHECKING TODO: CHECK FUNCTION INDEX??
     // check if the function index is valid
-    /*if (func_index < 0 || func_index >= MAX_FUNCTION_PTRS || header->func_ptr[func_index] == NULL) {*/
+    /*if (func_index < 0 || func_index >= MAX_FUNC_PTRS || header->func_ptr[func_index] == NULL) {*/
     /*    fprintf(stderr, "Invalid function index or NULL function pointer\n");*/
     /*    munmap(header_map, sizeof(Header));*/
     /*    return EXIT_FAILURE;*/
@@ -225,31 +225,3 @@ int call_subcontext_function(int func_index, int fd) {
     
     return EXIT_SUCCESS;
 }
-
-// include a main function here for testing???
-#ifdef SBC_CLIENT_MAIN
-int main(int argc, char **argv) {
-    if (argc < 2) {
-        printf("Usage: %s <image_file> [function_index]\n", argv[0]);
-        return EXIT_FAILURE;
-    }
-    
-    int fd = map_subcontext(argv[1]);
-    if (fd < 0) {
-        return EXIT_FAILURE;
-    }
-    
-    // If function index is provided, call that function
-    if (argc >= 3) {
-        int func_index = atoi(argv[2]);
-        call_subcontext_function(func_index, fd);
-    }
-    
-    // Keep mappings active until user presses a key
-    printf("Subcontext mapped. Press Enter to continue...\n");
-    getchar();
-    
-    close(fd);
-    return EXIT_SUCCESS;
-}
-#endif

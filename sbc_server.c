@@ -11,15 +11,20 @@
  */
 int create_image_file(const char *filename, void (**func_list)(int), size_t num_funcs) {
 
-    // get the root of the filename
+    // get a pointer to the dot
     char *dot = strchr(filename, '.');
-    if (dot) {
-        *dot = '\0';
+    if (dot == NULL) {
+        perror("strchr returned NULL!\n");
+        return EXIT_FAILURE;
     }
 
-    // our new file will be filename.img
+    // our new file will be filename.img, in directory img_files
     char output_filename[256];
-    snprintf(output_filename, sizeof(output_filename), "%s.img", filename);
+    int dot_position = dot - filename;
+    assert(dot_position < sizeof(output_filename) - 10);
+    memcpy(output_filename, "img_files/", 11);
+    memcpy(output_filename + 10, filename, dot_position);
+    memcpy(output_filename + 10 + dot_position, ".img", 5);
     
     printf("Creating memory snapshot in file: %s\n", output_filename);
     
