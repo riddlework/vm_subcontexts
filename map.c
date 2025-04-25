@@ -1,25 +1,34 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <string.h>
-#include <limits.h>
-#include <sys/mman.h>
-#include <stdint.h>
+#include "vm_sbc.h"
 
-#define BUFSZ 16000
-#define MAX_ENTRIES 1000  // max num of mem regions we can track
+void function1(int dummy);
+void function2(int dummy);
 
-typedef struct entry {
-    ulong start, end;
-    ulong offsetIntoFile;
-    char perms[5];  // store perms
-} Entry;
 
-typedef struct header {
-    ulong numEntries;
-    Entry entries[];  // flexible array size
-} Header;
+
+int (*func)(const char *, ...);
+int counter = 0;
+
+void dummy() {
+    /*write(1, "\n", 1);*/
+    /*puts("\n");*/
+    /*char *dummy_buf = malloc(32);*/
+    /*sprintf(dummy_buf, "hello, world!");*/
+    printf("\n");
+}
+
+void function1(int dummy) {
+    func = printf;
+    /*if (dummy) return;*/
+    /*void *ignored = printf;*/
+    /*printf("i");*/
+    counter++;
+    printf("hello, world! %d\n", counter);
+    fopen("dummy_file", "r");
+}
+
+void function2(int dummy) {
+    printf("end, %d\n", counter);
+}
 
 // exclude region based on name
 int should_exclude_region(const char *line) {
@@ -41,6 +50,13 @@ int parse_maps_line(const char *line, ulong *start, ulong *end, char *perms) {
 // mmap the file into the new program using the data from the file
 void dumpMemoryToFile() {
     // open /proc/self/maps
+    /*printf("address of printf: %p\n", printf);*/
+    /*printf("address of puts: %p\n", puts);*/
+    /*function2();*/
+    /*function1(1);*/
+    /*function1();*/
+    /*function1(0);*/
+    /*dummy();*/
     int maps_fd = open("/proc/self/maps", O_RDONLY);
 
     // error checking
@@ -94,7 +110,7 @@ void dumpMemoryToFile() {
         } line = strtok(NULL, "\n");
     }
 
-    // for debugging
+    // for debugging -- %zu for size_t
     printf("Found %zu memory regions (excluding special regions)\n", num_regions);
     
     // calculate the size of the total virtual space taken up by mappings
@@ -132,7 +148,7 @@ void dumpMemoryToFile() {
         exit(EXIT_FAILURE);
     }
 
-    // mmap the file
+    // perform mmap
     void *map = mmap(NULL, total_file_size, PROT_READ | PROT_WRITE, MAP_SHARED, w_fd, 0);
     if (map == MAP_FAILED) {
         perror("ERROR MAPPING FILE");
@@ -148,11 +164,14 @@ void dumpMemoryToFile() {
     ulong current_offset = aligned_header_size;
     
     // fill in entries and copy memory from appropriate regions
+    header->func_ptr[0] = function1;
+    header->func_ptr[1] = function2;
     for (size_t i = 0; i < num_regions; i++) {
         // fill in entry metadata
         header->entries[i].start = starts[i];
         header->entries[i].end   = ends[i];
         header->entries[i].offsetIntoFile = current_offset;
+        strcpy(header->entries[i].perms, perms[i]);
         
         // copy memory region if it has read permission
         if (perms[i][0] == 'r') {
@@ -162,6 +181,7 @@ void dumpMemoryToFile() {
             
             // copy the memory of the region
             if (memcpy(dest_addr, src_addr, region_size) != dest_addr) {
+                // debugging -- print if memcpy failed
                 fprintf(stderr, "Warning: Could not copy region %zu (%lx-%lx)\n", 
                         i, starts[i], ends[i]);
             }
@@ -171,31 +191,46 @@ void dumpMemoryToFile() {
         current_offset += (ends[i] - starts[i]);
     }
 
-    // Sync changes to disk
-    if (msync(map, total_file_size, MS_SYNC) == -1) {
-        perror("ERROR SYNCING FILE");
-    }
-
-    // Unmap file 
+    // perform unmapping
     if (munmap(map, total_file_size) == -1) {
         perror("ERROR UNMAPPING FILE");
     }
 
-    // Close file
+    // for debugging
+    /*char dummy_buf[256];*/
+    /*sprintf(dummy_buf, "cat /proc/%d/maps", getpid());*/
+    /*system(dummy_buf);*/
+
+    // close the file
+    // you can close the file before unmapping
     close(w_fd);
     
-    printf("Memory dump completed successfully to ./mem\n");
+    printf("Memory dump completed successfully to ./mem_dump\n");
 }
 
-int main() {
+int main(int argc, char **argv) {
     dumpMemoryToFile();
+    /*if (argc == -1) dummy();*/
+    /*if (argc == -1) {*/
+    /*    function1();*/
+    /*    function2();*/
+    /*}*/
     return 0;
 }
 
-// create a new process, map regions into new process
-// should all be map shared
-// use map fixed to fix the location
-// if overlaps with process maps, throw a terminal error
+
+
+/*void function1(void) {*/
+/*    counter++;*/
+/*    printf("hello, world! %d\n", counter);*/
+/*}*/
+/**/
+/*void function2(void) {*/
+/*    printf("end, %d\n", counter);*/
+/*}*/
+
+// do i need map fixed? should i be fixing the location in memory for the dump?
+
 // permissions that are important: private vs shared
 // private: not shared with other processes
 // shared: shared with other processes, won't be able to replicated in remapping process (report these as an error)
@@ -203,7 +238,7 @@ int main() {
 // after this, dummy function in original map process
 // record the memory address of this function and then try to call the function from the new process
 
-
 // the purpose of this first tool is to create a subcontext
 // the second tool creates a library that becomes the client of the subcontext and opens the subcontext
 // part of starting the process is getting a list of function pointers provided by the first tool that you should be able to call
+
