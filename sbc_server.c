@@ -1,4 +1,11 @@
+#include <string.h>
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include "vm_sbc.h"
+
 
 /**
  * creates a snapshot of the current program's memory and stores it in an image file.
@@ -13,18 +20,20 @@ int create_image_file(const char *filename, void (**func_list)(int), size_t num_
 
     // get a pointer to the dot
     char *dot = strchr(filename, '.');
-    if (dot == NULL) {
+    char *underscore = strchr(filename, '_');
+    if (dot == NULL || underscore == NULL) {
         perror("strchr returned NULL!\n");
         return EXIT_FAILURE;
     }
 
     // our new file will be filename.img, in directory img_files
     char output_filename[256];
-    int dot_position = dot - filename;
+    int dot_position        = dot        - filename;
+    int underscore_position = underscore - filename;
     assert(dot_position < sizeof(output_filename) - 10);
     memcpy(output_filename, "img_files/", 11);
-    memcpy(output_filename + 10, filename, dot_position);
-    memcpy(output_filename + 10 + dot_position, ".img", 5);
+    memcpy(output_filename + 10, filename + underscore_position + 1, dot_position - underscore_position - 1);
+    memcpy(output_filename + 10 + (dot_position - underscore_position - 1), ".img", 5);
     
     printf("Creating memory snapshot in file: %s\n", output_filename);
     

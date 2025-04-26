@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
     printf("dummy_function3: %p\n", (void*)dummy_function3);
     
     // call create_image_file with our function pointers
-    int result = create_image_file("test.c", function_array, 3);
+    int result = create_image_file(__FILE_NAME__, function_array, 3);
     
     // check result
     if (result == EXIT_SUCCESS) {

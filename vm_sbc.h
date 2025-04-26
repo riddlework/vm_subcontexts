@@ -1,20 +1,14 @@
 #ifndef _VM_SBC_H
 #define _VM_SBC_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <string.h>
-#include <limits.h>
 #include <sys/mman.h>
 #include <sys/types.h>
-#include <sys/stat.h>
-#include <stdint.h>
-#include <assert.h>
 
 // buffer size for reading /proc/self/maps
 #define BUFSZ 16000
+
+// for reading smaller things
+#define SMLBUFSZ 256
 
 // max number of memory regions to map
 #define MAX_ENTRIES 1024

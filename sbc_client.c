@@ -1,3 +1,9 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <assert.h>
 #include "vm_sbc.h"
 
 /**
@@ -204,13 +210,12 @@ int call_subcontext_function(int func_index, int fd) {
     
     header = (Header *)header_map;
     
-    // ERROR CHECKING TODO: CHECK FUNCTION INDEX??
     // check if the function index is valid
-    /*if (func_index < 0 || func_index >= MAX_FUNC_PTRS || header->func_ptr[func_index] == NULL) {*/
-    /*    fprintf(stderr, "Invalid function index or NULL function pointer\n");*/
-    /*    munmap(header_map, sizeof(Header));*/
-    /*    return EXIT_FAILURE;*/
-    /*}*/
+    if (func_index < 0 || func_index >= MAX_FUNC_PTRS || header->func_ptr[func_index] == NULL) {
+        fprintf(stderr, "Invalid function index or NULL function pointer\n");
+        munmap(header_map, sizeof(Header));
+        return EXIT_FAILURE;
+    }
     
     // Get the function pointer
     void (*func)(int) = header->func_ptr[func_index];
