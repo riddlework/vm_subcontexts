@@ -1,0 +1,3 @@
+active subcontext pointer? disable permissions on active, enable on mapped subcontext
+change from mprotect PROT_NONE to PROT_READ | PROT_WRITE
+change searching for library function
