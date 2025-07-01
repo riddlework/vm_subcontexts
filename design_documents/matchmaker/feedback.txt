@@ -1,0 +1,32 @@
+When a new client calls a service process, the service process accepts incoming
+connections from client rather than client requesting to connect to a process.
+
+Matchmaker allows client to announce its presence to server process--like a
+callback mechanism. A way to bounce an alert over to a service that there
+exists a client process that wishes to be granted access to the server
+subcontext.
+
+Granting permissions to Matchmaker grants permissions to the clients that have
+mapped it?
+
+Server processes accepting client processes' requests to connect.
+
+A client process asks the Matchmaker to speak to the service subcontext, which
+gives me a map to the service subcontext.
+
+Flip this around? The server announces to the Matchmaker that it exists and the
+Matchmaker displays it globally to the existing client processes.
+
+Matchmaker includes table of existing server subcontexts.
+
+Short term implementation plan, where every client subcontext maps every server
+subcontext.
+
+Symbol resolution for function pointers in Matchmaker.
+
+Matchmaker init returns a function pointer, which is the lookup function for
+the functions in the server subcontexts.
+
+Matchmaker_init(): process inducted into subcontext knowledge... maps matchmaker and everything else. want to map everything every time?
+publish_entrypoint(): a server requests to map itself into the global space. Maps itself, maps matchmaker, provides image file and function pointers.
+announcement(): something in the matchmaker, that a server process calls

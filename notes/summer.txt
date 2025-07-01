@@ -1,0 +1,13 @@
+1. Develop matchmaker subcontext image file
+2. Convert libraries from shared to static
+    -- This would require generating ELF executables by hand
+3. Enforce the permission restriction on regular processes mapping subcontext vs. the 
+    matchmaker subcontext, which should have much looser permission restrictions.
+    -- Make use of the SEGV signal handler in implementing this.
+4. Modify client library to map with mprotect to protection none.
+5. Have the client library keep a global list of mapped subcontexts, and have the ability
+    to map multiple subcontexts.
+6. A function call from a client process into a server process should cause a seg fault, which
+    we will then handle.
+    -- Here is where we make use of the SEGV signal handler.
+    -- Turn permissions on/off for the current subcontext in this way

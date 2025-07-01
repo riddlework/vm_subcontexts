@@ -1,0 +1,4 @@
+matchmaker is picked up by client processes
+
+when client picks up client-side library, they should implicitly
+pick up the matchmaker subcontext

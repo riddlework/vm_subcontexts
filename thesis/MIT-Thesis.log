@@ -1,0 +1,45 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2025.5.3)  24 JUN 2025 23:09
+entering extended mode
+ restricted \write18 enabled.
+ file:line:error style messages enabled.
+ %&-line parsing enabled.
+**MIT-Thesis.tex
+(./MIT-Thesis.tex
+LaTeX2e <2022-11-01> patch level 1
+L3 programming layer <2023-02-22>
+
+./MIT-Thesis.tex:15: LaTeX Error: No support files for \DocumentMetadata found.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.15 \DocumentMetadata
+                      
+Is the 'LaTeX-lab' bundle installed?
+Without it, the declaration is ignored.
+
+
+! LaTeX Error: File `mitthesis.cls' not found.
+
+Type X to quit or <RETURN> to proceed,
+or enter new name. (Default extension: cls)
+
+Enter file name: 
+./MIT-Thesis.tex:46: Emergency stop.
+<read *> 
+         
+l.46 ^^M
+        
+*** (cannot \read from terminal in nonstop modes)
+
+ 
+Here is how much of TeX's memory you used:
+ 26 strings out of 478087
+ 584 string characters out of 5842651
+ 1849388 words of memory out of 6000000
+ 20224 multiletter control sequences out of 15000+600000
+ 512287 words of font info for 32 fonts, out of 8000000 for 9000
+ 14 hyphenation exceptions out of 8191
+ 19i,0n,29p,137b,18s stack positions out of 10000i,1000n,20000p,200000b,200000s
+./MIT-Thesis.tex:46:  ==> Fatal error occurred, no output PDF file produced!

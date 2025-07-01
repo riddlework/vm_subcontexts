@@ -3,6 +3,7 @@
 
 #include <sys/mman.h>
 #include <sys/types.h>
+#include <signal.h>
 
 // buffer size for reading /proc/self/maps
 #define BUFSZ 16000
@@ -15,6 +16,9 @@
 
 // max num of function pointers to store
 #define MAX_FUNC_PTRS 16
+
+// max num of image files that a client process can map
+#define MAX_IMG_FILES 32
 
 typedef struct entry {
     ulong start, end;
@@ -29,11 +33,50 @@ typedef struct header {
     Entry entries[MAX_ENTRIES];
 } Header;
 
-// prototypes
-int create_image_file(const char *filename, void (**func_list)(int), size_t num_funcs);
-int map_subcontext(const char *filename);
-int call_subcontext_function(int func_index, int fd);
+// data structure to track mapped subcontexts
+typedef struct mapped_subcontext {
+    char    img_file[256];
+    int     fd;
+    void   *base_addr;
+    size_t  total_size;
+    Entry  *entries;
+    size_t  num_entries;
+    Header *header;
+    int     is_active;  // a flag indicating whether this subcontext is currently executable
+} MappedSubcontext;
 
+// client process memory regions
+// use for re-enabling client permissions
+typedef struct client_region {
+    void *start;
+    void *end;
+    int original_prot;
+} ClientRegion;
+
+// prototypes
+
+/* for server processes */
+int create_image_file(const char *filename, void (**func_list)(int), size_t num_funcs);
+
+/* for client processes */
+int map_subcontext(const char *filename); // client
+static void segv_handler(int sig, siginfo_t *info, void *context);
+static int setup_segv_handler(void);
+static int disable_client_execute_permissions(void);
+static int enable_client_execute_permissions(void);
+static int enable_subcontext_execute_permissions(void *fault_addr);
+static int disable_all_subcontext_execute_permissions(void);
+static MappedSubcontext* find_subcontext_by_addr(void *addr);
+static int record_client_memory_regions(void);
+static int is_library_address(void *addr);
+
+/* for the match maker */
+void init();
+int request_map(const char *img_fname);
+int request_func_call(int func_idx, int fd);
+void finalize();
+
+/* for use by server/client libraries */
 int check_for_overlap(unsigned long start, unsigned long end);
 int perms_to_prot(const char *perm);
 int should_exclude_region(const char *line);

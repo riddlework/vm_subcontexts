@@ -26,7 +26,7 @@ server_%: server_%.c libsbcserver.a
 client_%: client_%.c libsbcclient.a
 	$(CC) $(CFLAGS) $(LDFLAGS) client_$*.c -L . -l sbcclient -o client_$*
 
-# if a file "clean" exists, ignore it and execute the bellow rule
+# if a file "clean" exists, ignore it and execute the below rule
 .PHONY: clean
 
 clean:
