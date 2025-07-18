@@ -1,0 +1,15 @@
+A complete testing suite should be written. We need to test three overarching
+aspects of the code:
+
+    The server library: comprehensive testing should include (but not be
+    limited to) a process serializing its memory maps into a ".img" file
+   
+    The client library: comprehensive testing should include (but not be
+    limited to) a process mapping one of the preexisting image files into its
+    memory and making function calls into the mapped subcontext.
+    
+    The matchmaker: the matchmaker should mediate all interactions between the
+    outer and inner subcontexts, using a seg fault handler that registers the
+    SEGV signal. Testing should include testing the seg fault handler and all
+    appropriate functions within the matchmaker.
+

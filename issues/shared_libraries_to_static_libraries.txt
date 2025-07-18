@@ -1,0 +1,3 @@
+The client and server libraries are currently .o files, which means they are
+shared libraries. These should be converted to static libraries, which requires
+compiling the ELF executables by hand.

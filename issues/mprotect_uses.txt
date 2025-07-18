@@ -1,0 +1,1 @@
+All uses of mprotect should use PROT_READ | PROT_WRITE instead of PROT_NONE

@@ -53,6 +53,12 @@ typedef struct client_region {
     int original_prot;
 } ClientRegion;
 
+/* global state maintained in sbc_mm.c */
+extern MappedSubcontext mapped_subcontexts[MAX_IMG_FILES];
+extern size_t          num_mapped_subcontexts;
+extern ClientRegion    client_regions[MAX_ENTRIES];
+extern size_t          num_client_regions;
+
 // prototypes
 
 /* for server processes */
@@ -60,21 +66,23 @@ int create_image_file(const char *filename, void (**func_list)(int), size_t num_
 
 /* for client processes */
 int map_subcontext(const char *filename); // client
-static void segv_handler(int sig, siginfo_t *info, void *context);
-static int setup_segv_handler(void);
-static int disable_client_execute_permissions(void);
-static int enable_client_execute_permissions(void);
-static int enable_subcontext_execute_permissions(void *fault_addr);
-static int disable_all_subcontext_execute_permissions(void);
-static MappedSubcontext* find_subcontext_by_addr(void *addr);
-static int record_client_memory_regions(void);
-static int is_library_address(void *addr);
+int call_subcontext_function(int func_idx, int fd);
+int unmap_subcontext(int fd);
+int setup_segv_handler(void);
+int disable_client_execute_permissions(void);
+int enable_client_execute_permissions(void);
+int enable_subcontext_execute_permissions(void *fault_addr);
+int disable_all_subcontext_execute_permissions(void);
+MappedSubcontext* find_subcontext_by_addr(void *addr);
+int record_client_memory_regions(void);
+int is_library_address(void *addr);
+void sbc_client_init(void);
 
 /* for the match maker */
 void init();
 int request_map(const char *img_fname);
-int request_func_call(int func_idx, int fd);
 void finalize();
+void mm_handle_segv(void *fault_addr);
 
 /* for use by server/client libraries */
 int check_for_overlap(unsigned long start, unsigned long end);

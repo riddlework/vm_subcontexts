@@ -1,0 +1,48 @@
+Title: Memory Mapping Inconsistency in Client Subcontext Initialization
+
+Description: When initializing a client subcontext by mapping an image file
+produced by the server subcontext, the resulting memory layout appears
+misaligned. This misalignment sometimes leads to segmentation faults when
+client functions attempt to call into mapped server code. This issue seems
+intermittent and might be related to the page alignment handling.
+
+Steps to Reproduce:
+
+Build the project using make in the root directory.
+
+Run the provided example in img_files which maps a server image file.
+
+Execute a function call from the client subcontext that invokes a routine in
+the server image.
+
+Observe a segmentation fault or undefined behavior on certain runs.
+
+Expected Behavior:
+
+The client subcontext should cleanly map the server’s memory image.
+
+Function calls across the subcontext boundary must execute reliably without
+memory alignment issues.
+
+Memory mappings must ensure proper page alignment as specified in the POSIX
+standards.
+
+Actual Behavior:
+
+Occasionally, mapping returns memory that isn’t properly aligned with the
+expected page boundaries, causing segmentation faults during cross-context
+calls.
+
+The issue is more prevalent on systems with non-standard page sizes.
+
+Potential Areas of Investigation:
+
+Inspect the usage of mmap flags in src/context/client.c to ensure alignment
+constraints are met.
+
+Review the serialization format in src/context/server.c to confirm that page
+boundaries are respected when creating the image file.
+
+Add logging around the memory mapping routines to capture the requested and
+actual mapped addresses.
+

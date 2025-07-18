@@ -19,21 +19,26 @@
 int create_image_file(const char *filename, void (**func_list)(int), size_t num_funcs) {
 
     // get a pointer to the dot
-    char *dot = strchr(filename, '.');
-    char *underscore = strchr(filename, '_');
-    if (dot == NULL || underscore == NULL) {
+    char *dot = strrchr(filename, '.');
+    if (dot == NULL) {
         perror("strchr returned NULL!\n");
         return EXIT_FAILURE;
     }
+    size_t base_len;
+    char *underscore = strchr(filename, '_');
+    if (underscore)
+        base_len = dot - underscore - 1;
+    else
+        base_len = dot - filename;
 
-    // our new file will be filename.img, in directory img_files
     char output_filename[256];
-    int dot_position        = dot        - filename;
-    int underscore_position = underscore - filename;
-    assert(dot_position < sizeof(output_filename) - 10);
+    assert(base_len < sizeof(output_filename) - 10);
     memcpy(output_filename, "img_files/", 11);
-    memcpy(output_filename + 10, filename + underscore_position + 1, dot_position - underscore_position - 1);
-    memcpy(output_filename + 10 + (dot_position - underscore_position - 1), ".img", 5);
+    if (underscore)
+        memcpy(output_filename + 10, underscore + 1, base_len);
+    else
+        memcpy(output_filename + 10, filename, base_len);
+    memcpy(output_filename + 10 + base_len, ".img", 5);
     
     printf("Creating memory snapshot in file: %s\n", output_filename);
     
@@ -97,13 +102,16 @@ int create_image_file(const char *filename, void (**func_list)(int), size_t num_
 
     printf("Found %zu memory regions to include in image\n", num_regions);
     
-    // calculate total virtual space size
+    long page_size = sysconf(_SC_PAGESIZE);
+
+    // calculate total virtual space size (page aligned)
     size_t VIRTUAL_SPACE_SIZE = 0;
     for (size_t i = 0; i < num_regions; i++) {
         size_t region_size = ends[i] - starts[i];
         VIRTUAL_SPACE_SIZE += region_size;
-        printf("Region %zu: %lx-%lx (%s) Size: %zu bytes\n", 
+        printf("Region %zu: %lx-%lx (%s) Size: %zu bytes\n",
                i, starts[i], ends[i], perms[i], region_size);
+        VIRTUAL_SPACE_SIZE = (VIRTUAL_SPACE_SIZE + page_size - 1) & ~(page_size - 1);
     }
 
     printf("Total size of memory regions: %zu bytes\n", VIRTUAL_SPACE_SIZE);
@@ -117,9 +125,16 @@ int create_image_file(const char *filename, void (**func_list)(int), size_t num_
 
     // calculate header size and align it to page boundary
     size_t header_size = sizeof(Header) + num_regions * sizeof(Entry);
-    size_t aligned_header_size = (header_size + 4095) & ~4095;
-    size_t total_file_size = aligned_header_size + VIRTUAL_SPACE_SIZE;
-    
+    size_t aligned_header_size = (header_size + page_size - 1) & ~(page_size - 1);
+
+    // compute total file size with per-region alignment
+    size_t total_file_size = aligned_header_size;
+    for (size_t i = 0; i < num_regions; i++) {
+        size_t region_size = ends[i] - starts[i];
+        total_file_size += region_size;
+        total_file_size = (total_file_size + page_size - 1) & ~(page_size - 1);
+    }
+
     // set the file size
     if (ftruncate(w_fd, total_file_size) == -1) {
         perror("Error truncating file");
@@ -155,8 +170,8 @@ int create_image_file(const char *filename, void (**func_list)(int), size_t num_
     }
     
     // initialize the current offset for data after the header
-    ulong current_offset = aligned_header_size;
-    
+    size_t current_offset = aligned_header_size;
+
     // fill in entries and copy memory regions
     for (size_t i = 0; i < num_regions; i++) {
 
@@ -165,19 +180,24 @@ int create_image_file(const char *filename, void (**func_list)(int), size_t num_
         header->entries[i].end = ends[i];
         header->entries[i].offsetIntoFile = current_offset;
         strcpy(header->entries[i].perms, perms[i]);
-        
+
+        size_t region_size = ends[i] - starts[i];
+
         // copy memory region if it has read permission
         if (perms[i][0] == 'r') {
             void *src_addr = (void *)starts[i];
             void *dest_addr = (void *)((char *)map + current_offset);
-            size_t region_size = ends[i] - starts[i];
-            
+
             memcpy(dest_addr, src_addr, region_size);
         }
-        
+
         // update offset for next region
-        current_offset += (ends[i] - starts[i]);
+        current_offset += region_size;
+        current_offset = (current_offset + page_size - 1) & ~(page_size - 1);
     }
+
+    // final file size after all regions
+    total_file_size = current_offset;
 
     // unmap/close the file
     if (munmap(map, total_file_size) == -1) {
