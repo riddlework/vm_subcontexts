@@ -1,9 +1,0 @@
-The matchmaker needs to be built and/or fixed and should mediate all
-interactions between outer and inner subcontexts by registering the SEGV signal
-and handling it by writing a seg fault handler. The matchmaker should be a part
-of the client library. If a process picks up the client library it should
-implicitly pick up the matchmaker. See the design documents for more
-information on how the matchmaker should function.
-
-All changes should be made in sbc_mm.c
-
