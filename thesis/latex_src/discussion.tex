@@ -1,0 +1,53 @@
+\chapter*{DISCUSSION}
+\thispagestyle{fancy}
+\addcontentsline{toc}{chapter}{DISCUSSION}
+
+Subcontexts of virtual memory aim to displace the reliance on shared libraries by enabling modular, reusable code to coexist with strict memory isolation. The motivation is primarily architectural: to allow trusted logic to be embedded directly within a client’s virtual address space, without sacrificing protection guarantees. Conventional shared libraries trust their host programs and therefore cannot be protected from them, creating the need for protection to be enforced by some kind of barrier--normally syscalls (for services provided by the kernel) or some flavor of kernel mediation (for user-mode services). Subcontexts, on the other hand, allow code invocation to occur across clearly defined memory boundaries, with minimal performance penalty. In this sense, subcontexts seek to both \textit{replace} and \textit{improve upon} traditional dynamic linking by disallowing client process modification of subcontext memory except through well-defined entry points.
+
+\section*{Architecture and Design Insights}
+\addcontentsline{toc}{section}{Architecture and Design Insights}
+The division into \textbf{server}, \textbf{client}, and \textbf{matchmaker} components emerged as a natural architectural response to the problem at hand. The server-side library handles serialization, the client-side library handles mapping and utilization, and the matchmaker mediates interaction between them. And while the server-client split was intuitive, the matchmaker evolved through trial and error. It was originally conceptualized as a subcontext in and of itself: it was to be an image file that client processes would implicitly and automatically map into their virtual memory as they picked up the client-side library. It was later restructured as a lightweight runtime component embedded within the client library. This design choice unnecessary indirection while still enforcing execution protections.
+
+These protections are implemented using a \cinline{SIGSEGV} handler installed by the matchmaker. When a client process attempts to execute code in a subcontext region without the appropriate permissions, the fault is intercepted, and permissions are granted or revoked in a well-defined manner. This seemed the most straightforward way to mediate the interaction between client processes and their mapped subcontexts.
+
+\section*{Strengths of the Subcontext Model}
+\addcontentsline{toc}{section}{Strengths of the Subcontext Model}
+The most evident strength of the subcontext model is its modularity. Subcontexts are packaged in self-contained image files that can be picked up and mapped by any client process. This facilitates reuse free of recompilation or relinking. Multiple subcontexts can be mapped into a single client process, and the same subcontext can be simultaneously mapped by many clients, all without additional synchronization overhead. This capability for parallel mapping gives subcontexts a performance advantage over more traditional modularity mechanisms.
+
+Subcontexts also improve performance by avoiding overhead typically associated with  calls made between processes. Because they are invoked directly from within the address space of the client process without syscalls or context switches, function calls into a mapped subcontext are extremely lightweight.
+
+Another key strength is trust isolation. Clients cannot modify subcontext memory except through well-defined entry points and behavior specified only in subcontext routines. That is, even if a subcontext exposes a writable data structure (e.g., a global counter), it must do so deliberately, and always through routines defined within the subcontext itself. This controlled exposure makes the model inherently safer than shared libraries, which immediately and implicitly share the protection boundary of the host.
+
+Finally, our design abstracts away implementation details, making it agnostic of both language and system. While our prototype targets Linux and is written in C, its core design principles could be adapted to other systems with similar virtual memory models, or to other languages that allow for low-level memory management.
+
+\section*{Limitations of the Current Prototype}
+\addcontentsline{toc}{section}{Limitations of the Current Prototype}
+Despite these strengths, there are several limitations of our implementation our assumptions upon which it depends.
+
+\subsection*{1. Thread-Agnosticism}
+\addcontentsline{toc}{subsection}{Thread-Agnosticism}
+Our prototype is agnostic towards thread-management and for this reason does not support multi-threaded client processes, although it must be noted that a mapped subcontext is "shared" (essentially multi-threaded) among the client processes which map it. This may become problematic in environments where client processes expect concurrent behavior or where the routines of mapped subcontext may themselves spawn threads. This also means that uncoordinated access to a shared mapped subcontext introduces race conditions unless handled explicitly. For example, support for \cinline{pthread}s is currently broken under this model.
+
+\subsection*{2. Fixed Address Mapping and Memory Fragmentation}
+\addcontentsline{toc}{subsection}{Fixed Address Mapping and Memory Fragmentation}
+Subcontexts are mapped from their image files into fixed, pre-defined memory ranges. If a client process already occupies any of these regions, mapping fails entirely. This makes the system brittle in the face of address space fragmentation and severely limits compatibility with large, dynamic applications. The current design assumes that client processes have large swaths of unused virtual memory available, which is not always a safe assumption to make.
+
+\subsection*{Image Format and Entry Point Rigidity}
+\addcontentsline{toc}{subsection}{Image Format and Entry Point Rigidity}
+Our image format is deliberately minimal. It performs no compression or address relocation and stores only raw segments. Client processes must know entry point offsets ahead of time and cast raw function pointers into callable code. This limits portability, makes introspection difficult, and introduces potential safety hazards (e.g., if function boundaries are misaligned or corrupted).
+
+Additionally, because subcontexts are fixed-size post-serialization, dynamic memory allocation within them is potentially unsafe. Any attempt to allocate memory beyond the serialized footprint may result in errors or undefined behavior.
+
+\subsection*{4. Dynamic Linking Constraints}
+\addcontentsline{toc}{subsection}{Dynamic Linking Constraints}
+Currently, both the client and server libraries are `.so` (shared object) files. This choice restricts how symbols are resolved and creates some fragility in the linking process. In earlier iterations, we encountered linker issues where symbols from the serialized program failed to resolve unless they had been invoked \textit{before} serialization. Moving the serialization logic into a separate translation unit alleviated this issue, but highlighted the complex interplay between static linkage, dynamic resolution, and runtime behavior.
+
+\subsection*{5. User-Space Enforcement Only}
+\addcontentsline{toc}{subsection}{User-Space Enforcement Only}
+Perhaps the most consequential limitation of our implementation is the prototype’s user-space confinement. Without kernel-level enforcement, we rely entirely on user-level page permissions and fault handlers. A malicious client process could conceivably bypass the matchmaker or tamper with mapped image pages. Without kernel-mediated memory isolation, the current security guarantees are weaker than would otherwise be desired.
+
+\section*{Implementation Challenges and Surprises}
+\addcontentsline{toc}{section}{Implementation Challenges and Surprises}
+Several implementation surprises arose over the course of development. Most notably, linker behavior proved non-deterministic when serialization was performed within the same translation unit as the main program logic. Symbols belonging to uninvoked functions were pruned or left unresolved after serialization, leading to broken mappings. This issue disappeared when serialization logic was split into a separate file. This demonstrated to us the opaque nature of modern linkers as they relate to unused symbols.
+
+Another surprise was how well the segmentation fault handler approach worked to enforce control flow transitions. Though crude in some ways, it provided a clear and effective method for managing execution privileges without kernel support or binary rewriting.

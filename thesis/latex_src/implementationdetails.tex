@@ -1,0 +1,101 @@
+\chapter*{IMPLEMENTATION DETAILS}
+\thispagestyle{fancy}
+\addcontentsline{toc}{chapter}{IMPLEMENTATION DETAILS}
+
+\section*{Overview of Implementation Goals and Constraints}
+\addcontentsline{toc}{section}{Overview of Implementation Goals and Constraints}
+This prototype was implemented in C on Linux, in user-space and utilizing only user-space facilities. The language choice reflects the need for precise and low-level control over memory layout, permissions, and signal handling. In particular, C allows for the direct use of system calls like \cinline{mmap}, \cinline{mprotect}, and \cinline{sigaction}, which are central to managing memory and handling page faults at a very low-level in user space.
+
+Our prototype was developed under several constraints, the most important of which being that we made no kernel modifications. That is, our prototype exists only in user-space and utilizes only user-space facilities. All protections and transitions must be enforced at the user level. Our implementation targets Linux specifically, although future work may include portability to other UNIX-like systems. Given time constraints, we chose to adopt a minimal design that still acted as a concrete proof-of-concept. In future, we would like to extend this design to more completely and thoroughly embody the concept at the heart of this prototype.
+
+\newpage
+\section*{Codebase and File Structure}
+\addcontentsline{toc}{section}{Codebase and File Structure}
+The codebase is split across four files:
+\begin{itemize}
+    \item \cinline{sbc_server.c}: Handles memory serialization logic as well as the creation of image files.
+    \item \cinline{sbc_client.c}: Implements memory mapping and function invocation for subcontexts.
+    \item \cinline{sbc_mm.c}: The matchmaker implementation, which handles memory protection and signal handling logic.
+    \item \cinline{vm_sbc.h}: A header file. Contains shared data structures, constants, and declarations across modules.
+\end{itemize}
+
+This modular structure facilitates reuse and delimits the conceptual boundaries outlined in the previous section. Common types, constraints, and function stubs live in the header, while each source file maintains responsibility for a specific phase of the subcontext lifecycle.
+
+\section*{Server Implementation}
+\addcontentsline{toc}{section}{Server Implementation}
+The server is responsible for identifying memory regions to serialize as well as creating an image file that represents a process frozen at a given moment in time. It begins by inspecting \cinline{/proc/self/maps} to enumerate all memory regions. These regions are then parsed and filtered to exclude dynamic heap and stack segments, as well as any shared libraries or memory-mapped I/O regions. We chose to exclude these regions because they were unnecessary for function invocation from within a client process.
+
+Each memory segment to be serialized in the image file is represented by an `Entry` struct, which stores its virtual address range, permissions, and offset into the file. These structures are organized into an array, which becomes the header for the image file.
+
+This header includes:
+\begin{itemize}
+    \item The number of memory regions present in or copied from the target process
+    \item Virtual address ranges for each regions
+    \item Permissions (read/write/execute)
+    \item Offset values indicating where in the file each region's contents begin
+    \item An array of pointers to the functions defined by the process contained within the image file
+\end{itemize}
+
+After writing the header, the contents of each region are copied bit-for-bit using \cinline{memcpy}. Once the image is complete, the server exits. Its memory is now captured entirely in a reusable binary format, ready to be mapped by any client.
+
+\section*{Client Implementation}
+\addcontentsline{toc}{section}{Client Implementation}
+The client reads an image file, maps its memory regions into disjoint parts of its own virtual address space, and invokes predefined functions defined within the subcontext.
+
+The client begins by opening the image file and parsing the header. It ensures that the fixed virtual address ranges of the subcontext do not overlap with its own occupied virtual address ranges. If such an overlap is found for any given region present in the image file, the program terminates with an error. If no overlap is found, information about the subcontext is stored into a global data structure.
+
+Next, each segment is mapped with all permissions (i.e., \cinline{PROT_READ}, \cinline{PROT_WRITE}, and \cinline{PROT_EXEC}) to be modified to appropriate permissions based on the original serialized state by the matchmaker later, as we intended to use \cinline{mprotect} to turn off permissions already granted rather than to turn on permissions previously denied. These mappings utilize the \cinline{MAP_SHARED | MAP_FIXED} flags to ensure that the memory of a given mapped subcontext is shared across all of the client processes that map it and that the mapping of the subcontext's memory regions occurs in the locations previously specified.
+
+The client maintains an internal linked list of active subcontexts using a \cinline{MappedSubcontext} struct, which tracks base address, size, entry points, and usage flags, among other things. Usage of this data structure allows efficient lookup and execution routing.
+
+Function calls into subcontext memory are performed using predefined entry point offsets. These are cast to known function signatures using function pointers. All invocations are mediated by the matchmaker to ensure that execute permissions are toggled appropriately, directly before and after each call.
+
+\section*{Matchmaker and Safety Enforcement}
+\addcontentsline{toc}{section}{Matchmaker and Safety Enforcement}
+The matchmaker acts at runtime and is embedded in the client library. Its primary role is to enforce memory execution boundaries between client code and subcontext code. This is achieved by registering a custom \cinline{SIGSEGV} handler using \cinline{sigaction}and dynamically toggling execute permissions using \cinline{mprotect}.
+
+When a client invokes a function which resides in a subcontext, the matchmaker first disables all executable pages in the client’s address space and enables pages belonging to the subcontext. Excluded pages include those required for minimal runtime support, as well as those containing \cinline{[vvar]} and \cinline{[vdso]}, for if the pages contained within these regions are disabled, an \cinline{ENOMEM} error occurs.
+
+Once execution returns to client code, a page fault is triggered on an unmapped or non-executable client address. This transfers control to the \cinline{SIGSEGV} handler, which recognizes the transition and reverses the permission mappings accordingly. If the address does not belong to any mapped subcontext, the custom handler cannot resolve the fault, so the \cinline{SIGSEGV} signal is re-raised with the default, so that the process does not endlessly loop in the handler.
+
+All active subcontexts are registered in a global table that stores their address range, state, and associated permissions. The matchmaker consults this table to determine which pages to re-enable or disable.
+
+\section*{System Interfaces Used}
+\addcontentsline{toc}{section}{System Interfaces Used}
+We rely on several methods belonging to the Standard C Library (\cinline{libc}) API:
+\begin{itemize}
+    \item \cinline{mmap}: For allocating memory and mapping file-backed regions into virtual address spaces.
+    \item \cinline{mprotect}: For toggling page permissions.
+    \item \cinline{sigaction}: For installing a custom signal handler.
+    \item \cinline{memcpy}: For copying memory into files.
+\end{itemize}
+
+Our implementation also depends on the kernel feature \cinline{/proc/self/maps}, the use of which allows us to discover the memory layout of the current process. These interfaces allow us to build the system entirely in user space, at the cost of some safety guarantees that presence in the kernel would alleviate.
+
+\section*{User Experience}
+\addcontentsline{toc}{section}{User Experience}
+From the perspective of a user or developer, working with subcontexts of virtual memory is both similar to and different from conventional shared library usage. In the current implementation, developers must include the header file \cinline{vm_sbc.h} to gain access to the virtual memory subcontext API in addition to compiling their programs with the server-side library (\cinline{libsbcserver.a}) or the client-side library (\cinline{libsbcclient.a}). In future, we hope to eliminate this dependency on the shared library format in favor of the static library format.
+
+In terms of use, the API is intuitive and intentionally minimal. Creating a subcontext involves a single call to a function which serializes designated memory regions. Mapping a subcontext from an image file is equally straightforward. All details of low-level address space management are abstracted away. This means that developers need not consider virtual offsets or page alignment problems, as these are handled internally by the system.
+
+Debugging errors related to subcontext use is slightly less straightforward. Error handling is minimal and only follows standard C conventions, providing features such as minimal return codes to simplify debugging. Future development should focus at least in part on debugging tools.
+
+Utilizing subcontexts feels similar to normal function calls from the developer's perspective, with only one added layer of abstraction between the developer and the desired function. Latency in function calls, matchmaker mediation, and the mapping and unmapping of subcontexts from within the virtual address space of a client process is not something our implementation explored at any reasonable depth.
+
+Overall, the provided libraries integrate cleanly with any existing code and require little to no refactoring, meaning that developers can focus on the logic they want to share, while the system handles enforcement of safety guarantees internally.
+
+
+\section*{Summary and Future Implementation Directions}
+This prototype demonstrates a proof-of-concept of virtual memory subcontexts, built using only user-space tools. We’ve implemented serialization, mapping, and execution transitions between isolated code regions with no kernel support. While limited, the prototype validates the core concept while remaining extensible.
+
+% REMOVE THIS SECTION? COVERED EXTENSIVELY IN OTHER SECTION...
+To this end, future implementation efforts may include:
+\begin{itemize}
+    \item Moving matchmaker logic into the kernel or a privileged user-space daemon.
+    \item Ensuring thread-safeness, and thus support for multi-threaded clients.
+    \item Adding support for debugging and tracing.
+    \item Implementing a richer image format with compression.
+    \item Exploring static linking or ELF post-processing.
+\end{itemize}
+
+While our implementation is only a first approximation, it demonstrates the feasibility of the system and reveals novel abstractions whose applications impact code reusability and the implicit protections such reusability provides.

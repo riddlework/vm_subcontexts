@@ -1,0 +1,704 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="1003.4727"
+   height="776.09521"
+   viewBox="0 0 1003.4727 776.09521"
+   version="1.1"
+   id="svg33"
+   sodipodi:docname="subcontexts_slotting_into_client.svg"
+   inkscape:version="1.4.2 (ebf0e940d0, 2025-05-08)"
+   inkscape:export-filename="subcontexts_slotting_into_client.png"
+   inkscape:export-xdpi="81.55545"
+   inkscape:export-ydpi="81.55545"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview33"
+     pagecolor="#ffffff"
+     bordercolor="#999999"
+     borderopacity="1"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.3472148"
+     inkscape:cx="436.08488"
+     inkscape:cy="351.83699"
+     inkscape:window-width="2256"
+     inkscape:window-height="1435"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg33" />
+  <defs
+     id="defs1">
+    <style
+       type="text/css"
+       id="style1"><![CDATA[
+      .title { font: 700 24px "Helvetica Neue", Arial, sans-serif; fill: #111; }
+      .label { font: 600 16px "Helvetica Neue", Arial, sans-serif; fill: #222; }
+      .small { font: 13px "Helvetica Neue", Arial, sans-serif; fill: #333; }
+      .note  { font: italic 12px "Helvetica Neue", Arial, sans-serif; fill: #555; }
+      .proc  { fill: #fbfcff; stroke: #6b86c5; stroke-width: 2; rx: 14; ry: 14; }
+      .client{ fill: #fffdfa; stroke: #c7a76a; stroke-width: 2; rx: 14; ry: 14; }
+      .regC  { fill: #eef3ff; stroke: #6b86c5; stroke-width: 1.6; rx: 8; ry: 8; }   /* code */
+      .regS  { fill: #f0f5ff; stroke: #6b86c5; stroke-width: 1.6; rx: 8; ry: 8; }   /* stack */
+      .regG  { fill: #eefbf1; stroke: #65a777; stroke-width: 1.6; rx: 8; ry: 8; }   /* globals */
+      .gap   { fill: #f5f5f5; stroke: #d0d0d0; stroke-width: 1.2; rx: 6; ry: 6; stroke-dasharray: 6 6; }
+      .mapped{ fill: #e7f0ff; stroke: #4f91ff; stroke-width: 1.8; rx: 8; ry: 8; }
+      .mapped2{ fill: #e8ffef; stroke: #43a06c; stroke-width: 1.8; rx: 8; ry: 8; }
+      .arrow { stroke: #333; stroke-width: 2.4; marker-end: url(#arrowhead); fill: none; }
+      .legend{ fill: #ffffff; stroke: #bfc7d2; stroke-width: 1.5; rx: 10; ry: 10; }
+    ]]></style>
+    <marker
+       id="arrowhead"
+       markerWidth="12"
+       markerHeight="8"
+       refX="10.5"
+       refY="4"
+       orient="auto">
+      <polygon
+         points="12,4 0,8 0,0 "
+         fill="#333333"
+         id="polygon1" />
+    </marker>
+    <marker
+       id="arrowhead-4"
+       markerWidth="12"
+       markerHeight="8"
+       refX="10.5"
+       refY="4"
+       orient="auto">
+      <polygon
+         points="0,8 0,0 12,4 "
+         fill="#333333"
+         id="polygon1-0" />
+    </marker>
+    <marker
+       id="arrowhead-9"
+       markerWidth="12"
+       markerHeight="8"
+       refX="10.5"
+       refY="4"
+       orient="auto">
+      <polygon
+         points="0,8 0,0 12,4 "
+         fill="#333333"
+         id="polygon1-08" />
+    </marker>
+    <marker
+       id="arrowhead-1"
+       markerWidth="12"
+       markerHeight="8"
+       refX="10.5"
+       refY="4"
+       orient="auto">
+      <polygon
+         points="0,8 0,0 12,4 "
+         fill="#333333"
+         id="polygon1-03" />
+    </marker>
+    <marker
+       id="arrowhead-4-9"
+       markerWidth="12"
+       markerHeight="8"
+       refX="10.5"
+       refY="4"
+       orient="auto">
+      <polygon
+         points="0,0 12,4 0,8 "
+         fill="#333333"
+         id="polygon1-0-1" />
+    </marker>
+  </defs>
+  <text
+     class="title"
+     x="17.299471"
+     y="17.390625"
+     id="text1"
+     style="font-style:normal;font-variant:normal;font-weight:700;font-stretch:normal;font-size:24px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif">Mapping disjoint subcontext regions into gaps of a client process</text>
+  <text
+     class="note"
+     x="17.299471"
+     y="43.390625"
+     id="text2"
+     style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif"><tspan
+       sodipodi:role="line"
+       id="tspan70"
+       x="17.299471"
+       y="43.390625">Two server processes (A and B) have fixed, non-overlapping memory regions that we serialize; the client process then maps them into its sparse, large, otherwise empty</tspan><tspan
+       sodipodi:role="line"
+       id="tspan71"
+       x="17.299471"
+       y="58.390625">virtual address space.</tspan></text>
+  <!-- Left: Source processes that will be serialized into subcontexts -->
+  <rect
+     class="proc"
+     x="11.299472"
+     y="77.390625"
+     width="320"
+     height="620"
+     id="rect2"
+     style="fill:#ffffff;stroke:#000000" />
+  <rect
+     class="gap"
+     x="32.508846"
+     y="137.87859"
+     width="279.24533"
+     height="155.3409"
+     id="rect17-7-1"
+     style="fill:#f5f5f5;stroke:#d0d0d0;stroke-width:2.15136;stroke-dasharray:10.7568, 10.7568" />
+  <text
+     class="note"
+     x="135.46231"
+     y="213.25417"
+     id="text18-7-2"
+     style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif;fill:#555555">gap / unused VA</text>
+  <g
+     id="g67-2"
+     transform="translate(-387.43272,80.751535)">
+    <rect
+       class="gap"
+       x="419.03146"
+       y="269.56781"
+       width="279.2301"
+       height="157.55252"
+       id="rect17-7-47"
+       style="fill:#f5f5f5;stroke:#d0d0d0;stroke-width:2.16656;stroke-dasharray:10.8328, 10.8328" />
+    <text
+       class="note"
+       x="520.4928"
+       y="351.61624"
+       id="text18-7-7"
+       style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif;fill:#555555">gap / unused VA</text>
+  </g>
+  <g
+     id="g1">
+    <rect
+       class="gap"
+       x="29.257631"
+       y="609.72052"
+       width="279.97415"
+       height="67.739372"
+       id="rect17-7-4"
+       style="fill:#f5f5f5;stroke:#d0d0d0;stroke-width:1.42251;stroke-dasharray:7.11257, 7.11257" />
+    <text
+       class="note"
+       x="131.09099"
+       y="644.6355"
+       id="text18-7-6"
+       style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif;fill:#555555">gap / unused VA</text>
+  </g>
+  <text
+     class="label"
+     x="27.299471"
+     y="105.39062"
+     id="text3"
+     style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:16px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif">Server Process: Subcontext A</text>
+  <g
+     id="g49"
+     transform="translate(-20.185077,140.69047)">
+    <rect
+       class="regC"
+       x="49.678932"
+       y="159.67892"
+       width="280.64215"
+       height="42.909431"
+       id="rect3"
+       style="fill:#eefbf1;fill-opacity:1;stroke:#7db58d;stroke-opacity:1" />
+    <text
+       class="small"
+       x="155.78079"
+       y="186"
+       id="text4"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif">code A (RX)</text>
+  </g>
+  <g
+     id="g50"
+     transform="translate(-19.4428,260.93859)">
+    <rect
+       class="regS"
+       x="49.70956"
+       y="299.70953"
+       width="280.58084"
+       height="43.784706"
+       id="rect4"
+       style="fill:#eefbf1;fill-opacity:1;stroke:#65a777;stroke-opacity:1" />
+    <text
+       class="small"
+       x="165.14618"
+       y="326"
+       id="text5"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif">stack A (—)</text>
+  </g>
+  <g
+     id="g51"
+     transform="translate(-20.185072,74.628271)">
+    <rect
+       class="regG"
+       x="49.668499"
+       y="439.66849"
+       width="280.66299"
+       height="41.05722"
+       id="rect6" />
+    <text
+       class="small"
+       x="101.46155"
+       y="466"
+       id="text7"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif">globals A (R/W via routines)</text>
+  </g>
+  <rect
+     class="proc"
+     x="379.09369"
+     y="77.390625"
+     width="320"
+     height="620"
+     id="rect8"
+     style="fill:#ffffff;stroke:#000000" />
+  <rect
+     class="gap"
+     x="404.30365"
+     y="466.508"
+     width="278.89294"
+     height="210.65895"
+     id="rect17-7-0"
+     style="fill:#f5f5f5;stroke:#d0d0d0;stroke-width:2.50372;stroke-dasharray:12.5186, 12.5186" />
+  <text
+     class="note"
+     x="504.11185"
+     y="572.14062"
+     id="text18-7-3"
+     style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif;fill:#555555">gap / unused VA</text>
+  <rect
+     class="gap"
+     x="401.64255"
+     y="243.07417"
+     width="279.5759"
+     height="111.13518"
+     id="rect17-7"
+     style="fill:#f5f5f5;stroke:#d0d0d0;stroke-width:1.82076;stroke-dasharray:9.1038, 9.1038" />
+  <text
+     class="note"
+     x="504.01907"
+     y="305.25415"
+     id="text18-7"
+     style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif;fill:#555555">gap / unused VA</text>
+  <g
+     id="g65-3"
+     transform="translate(-18.350028,-129.88756)">
+    <rect
+       class="gap"
+       x="418.52811"
+       y="269.06445"
+       width="280.23682"
+       height="44.991596"
+       id="rect17-7-3"
+       style="fill:#f5f5f5;stroke:#d0d0d0;stroke-width:1.15986;stroke-dasharray:5.79929, 5.79929" />
+    <text
+       class="note"
+       x="520.4928"
+       y="295.20355"
+       id="text18-7-8"
+       style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif;fill:#555555">gap / unused VA</text>
+  </g>
+  <text
+     class="label"
+     x="395.09369"
+     y="105.39062"
+     id="text9"
+     style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:16px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif">Source Process: Subcontext B</text>
+  <g
+     id="g54"
+     transform="translate(-18.700528,31.576489)">
+    <rect
+       class="regC"
+       x="417.45993"
+       y="159.6657"
+       width="282.54169"
+       height="47.01474"
+       id="rect9"
+       style="fill:#ffd5d5;stroke:#ffaaaa" />
+    <text
+       class="small"
+       x="522.63849"
+       y="186"
+       id="text10"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif">code B (RX)</text>
+  </g>
+  <g
+     id="g53"
+     transform="translate(-15.73144,93.185065)">
+    <rect
+       class="regG"
+       x="417.56241"
+       y="319.76819"
+       width="280.46359"
+       height="46.477043"
+       id="rect10"
+       style="fill:#ffd5d5;stroke:#ffaaaa" />
+    <text
+       class="small"
+       x="486.11346"
+       y="346"
+       id="text11"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif">globals B (R/W via routines)</text>
+  </g>
+  <g
+     id="g66"
+     transform="translate(-15.73144,-99.063409)">
+    <g
+       id="g52">
+      <rect
+         class="regS"
+         x="417.49338"
+         y="459.69916"
+         width="280.60172"
+         height="46.615154"
+         id="rect11"
+         style="fill:#ffd5d5;fill-opacity:1;stroke:#ffaaaa" />
+    </g>
+    <text
+       class="small"
+       x="527.32117"
+       y="486"
+       id="text12"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif">stack B (—)</text>
+  </g>
+  <!-- Right: Client address space with gaps -->
+  <rect
+     class="client"
+     x="740.95905"
+     y="77.050179"
+     width="260.71738"
+     height="620.68091"
+     id="rect13" />
+  <rect
+     class="gap"
+     x="766.73767"
+     y="348.38556"
+     width="218.64366"
+     height="56.141109"
+     id="rect17-7-8-5"
+     style="fill:#f5f5f5;stroke:#d0d0d0;stroke-width:1.14442;stroke-dasharray:5.7221, 5.7221" />
+  <text
+     class="note"
+     x="835.30774"
+     y="380.47058"
+     id="text18-7-0-8"
+     style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif;fill:#555555">gap / unused VA</text>
+  <rect
+     class="gap"
+     x="768.97284"
+     y="243.78574"
+     width="216.5237"
+     height="46.598427"
+     id="rect17-7-8-4"
+     style="fill:#f5f5f5;stroke:#d0d0d0;stroke-width:1.03756;stroke-dasharray:5.18782, 5.18782" />
+  <text
+     class="note"
+     x="837.59637"
+     y="272.21283"
+     id="text18-7-0-7"
+     style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif;fill:#555555">gap / unused VA</text>
+  <g
+     id="g69"
+     transform="translate(-18.700528,-22.609375)">
+    <rect
+       class="gap"
+       x="785.91492"
+       y="586.18262"
+       width="218.51628"
+       height="69.374626"
+       id="rect17-7-8"
+       style="fill:#f5f5f5;stroke:#d0d0d0;stroke-width:1.2718;stroke-dasharray:6.359, 6.359" />
+    <text
+       class="note"
+       x="853.67908"
+       y="624.8844"
+       id="text18-7-0"
+       style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif;fill:#555555">gap / unused VA</text>
+  </g>
+  <g
+     id="g68"
+     transform="translate(-18.700528,-22.609375)">
+    <rect
+       class="regS"
+       x="786.10797"
+       y="534.4079"
+       width="217.67542"
+       height="43.972412"
+       id="rect4-9"
+       style="fill:#eefbf1;fill-opacity:1;stroke:#65a777;stroke-width:1.41229;stroke-opacity:1" />
+    <text
+       class="small"
+       x="821.47314"
+       y="559.30762"
+       id="text5-6"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif;fill:#333333">globals A (R/W via routines)</text>
+  </g>
+  <g
+     id="g62"
+     transform="translate(-18.700528,-22.609375)">
+    <rect
+       class="regC"
+       x="786.37659"
+       y="320.32443"
+       width="217.73662"
+       height="43.097034"
+       id="rect3-5"
+       style="fill:#eefbf1;fill-opacity:1;stroke:#7db58d;stroke-width:1.4124;stroke-opacity:1" />
+    <text
+       class="small"
+       x="865.85046"
+       y="345.25479"
+       id="text4-9"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif;fill:#333333">code A (RX)</text>
+  </g>
+  <g
+     id="g63"
+     transform="translate(-18.700528,146.62866)">
+    <rect
+       class="regG"
+       x="784.44061"
+       y="266.50204"
+       width="219.03825"
+       height="46.660282"
+       id="rect10-5"
+       style="fill:#ffd5d5;stroke:#ffaaaa;stroke-width:1.41676" />
+    <text
+       class="small"
+       x="817.45422"
+       y="294.31"
+       id="text11-7"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif;fill:#333333">globals B (R/W via routines)</text>
+  </g>
+  <g
+     id="g64"
+     transform="translate(-18.700528,-22.609375)">
+    <rect
+       class="regC"
+       x="784.6051"
+       y="213.08928"
+       width="220.375"
+       height="47.198917"
+       id="rect9-6"
+       style="fill:#ffd5d5;stroke:#ffaaaa;stroke-width:1.41582" />
+    <text
+       class="small"
+       x="859.44263"
+       y="241.74248"
+       id="text10-2"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif;fill:#333333">code B (RX)</text>
+  </g>
+  <text
+     class="label"
+     x="757.2995"
+     y="105.39062"
+     id="text14"
+     style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:16px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif"><tspan
+       sodipodi:role="line"
+       id="tspan35"
+       x="757.2995"
+       y="105.39062">Client Process</tspan><tspan
+       sodipodi:role="line"
+       x="757.2995"
+       y="125.39062"
+       id="tspan36">Virtual Address Space</tspan></text>
+  <rect
+     class="regC"
+     x="765.0155"
+     y="137.10666"
+     width="220.56793"
+     height="45.650444"
+     id="rect14" />
+  <text
+     class="small"
+     x="826.06262"
+     y="163.39062"
+     id="text15"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif">client code (RX)</text>
+  <g
+     id="g60"
+     transform="translate(-18.700528,-22.609375)">
+    <rect
+       class="regS"
+       x="784.30542"
+       y="487.89752"
+       width="220.36945"
+       height="41.336742"
+       id="rect16-4"
+       style="fill:#f0f5ff;stroke:#6b86c5;stroke-width:1.23056" />
+    <text
+       class="small"
+       x="844.75995"
+       y="514.19446"
+       id="text17-0"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif;fill:#333333">client globals (RW)</text>
+  </g>
+  <g
+     id="g58"
+     transform="translate(-17.958256,20.442407)">
+    <rect
+       class="regS"
+       x="783.81531"
+       y="619.81531"
+       width="220.36945"
+       height="41.336742"
+       id="rect16" />
+    <text
+       class="small"
+       x="868.24042"
+       y="646"
+       id="text17"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif">client stack</text>
+  </g>
+  <!-- Arrows showing slotting from sources into client gaps -->
+  <path
+     class="arrow"
+     d="m 309.87926,319.24061 c 151.11173,0 151.11173,0 453.33523,0"
+     id="path26" />
+  <path
+     class="arrow"
+     d="m 683.77477,437.96755 c 27.43062,0 27.43062,0 82.29187,0"
+     id="path26-2"
+     style="fill:none;stroke:#333333;stroke-width:1.14746;marker-end:url(#arrowhead-4)" />
+  <path
+     class="arrow"
+     d="m 682.60819,215.39157 c 27.43062,0 27.43062,0 82.29187,0"
+     id="path26-2-6"
+     style="fill:none;stroke:#333333;stroke-width:1.14746;marker-end:url(#arrowhead-4-9)" />
+  <path
+     class="arrow"
+     d="m 308.97027,538.31803 c 151.11173,0 151.11173,0 453.33523,0"
+     id="path26-0"
+     style="fill:none;stroke:#333333;stroke-width:2.69321;marker-end:url(#arrowhead-1)" />
+  <!-- Legend -->
+  <rect
+     class="legend"
+     x="0.64046162"
+     y="721.34204"
+     width="1002.1917"
+     height="54.112682"
+     id="rect28" />
+  <rect
+     class="proc"
+     x="15.541347"
+     y="732.38721"
+     width="22.228945"
+     height="24.016809"
+     id="rect29"
+     style="fill:#ffffff;stroke:#000000" />
+  <text
+     class="small"
+     x="45.036243"
+     y="720.00348"
+     id="text29"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif;stroke-width:0.962733"
+     transform="scale(0.96205916,1.0394371)">Source process virtual address space</text>
+  <g
+     id="g38"
+     transform="translate(-114.32315,-22.609375)">
+    <rect
+       class="client"
+       x="380.64294"
+       y="754.99658"
+       width="22.228945"
+       height="24.016809"
+       id="rect30" />
+    <text
+       class="small"
+       x="424.53641"
+       y="741.75507"
+       id="text30"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif;stroke-width:0.962733"
+       transform="scale(0.96205915,1.0394371)">Client address space</text>
+  </g>
+  <g
+     id="g37"
+     transform="translate(-193.72888,-22.609375)">
+    <rect
+       class="gap"
+       x="658.50476"
+       y="754.99658"
+       width="22.228945"
+       height="24.016809"
+       id="rect31" />
+    <text
+       class="small"
+       x="713.35626"
+       y="741.75507"
+       id="text31"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif;stroke-width:0.962733"
+       transform="scale(0.96205915,1.0394371)">Gap/hole</text>
+  </g>
+  <g
+     id="g48"
+     transform="translate(-58.04095,-22.609375)">
+    <rect
+       class="mapped"
+       x="641.46027"
+       y="754.99658"
+       width="22.228945"
+       height="24.016809"
+       id="rect32"
+       style="fill:#ffd5d5;fill-opacity:1;stroke:#ffaaaa;stroke-opacity:1" />
+    <text
+       class="small"
+       x="695.63953"
+       y="741.75507"
+       id="text32"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif;stroke-width:0.962733"
+       transform="scale(0.96205916,1.0394371)">Memory regions (Process A)</text>
+  </g>
+  <g
+     id="g40"
+     transform="translate(-374.39675,-22.609375)">
+    <rect
+       class="mapped2"
+       x="1167.9181"
+       y="754.99658"
+       width="22.228945"
+       height="24.016809"
+       id="rect33" />
+    <text
+       class="small"
+       x="1242.8594"
+       y="741.75507"
+       id="text33"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13px;line-height:normal;font-family:'Helvetica Neue', Arial, sans-serif;stroke-width:0.962733"
+       transform="scale(0.96205915,1.0394371)">Memory regions (Process B)</text>
+  </g>
+  <text
+     xml:space="preserve"
+     style="font-size:22.6667px;font-family:Mokoto;-inkscape-font-specification:'Mokoto, Normal';text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#ffffff;stroke:#000000"
+     x="1014.8093"
+     y="17.751762"
+     id="text34"><tspan
+       sodipodi:role="line"
+       id="tspan33"
+       x="1014.8093"
+       y="17.751762" /></text>
+  <text
+     xml:space="preserve"
+     style="font-size:22.6667px;font-family:Mokoto;-inkscape-font-specification:'Mokoto, Normal';text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#00ffff;stroke:#00ffff"
+     x="1149.1631"
+     y="691.9696"
+     id="text37"><tspan
+       sodipodi:role="line"
+       id="tspan37"
+       x="1149.1631"
+       y="691.9696" /></text>
+  <text
+     xml:space="preserve"
+     style="font-size:22.6667px;font-family:Mokoto;-inkscape-font-specification:'Mokoto, Normal';text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#eefbf1;fill-opacity:1;stroke:#7db58d;stroke-opacity:1"
+     x="901.91699"
+     y="556.17151"
+     id="text46"><tspan
+       sodipodi:role="line"
+       id="tspan46"
+       x="901.91699"
+       y="556.17151" /></text>
+</svg>

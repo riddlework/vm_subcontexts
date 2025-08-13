@@ -1,0 +1,12 @@
+\chapter*{ABSTRACT}
+\thispagestyle{fancy} %Resets custom page number location on page
+\addcontentsline{toc}{chapter}{ABSTRACT}
+Shared libraries are a standard mechanism for code reuse, but they operate within the protection boundaries of the processes they are linked into. As a result, once embedded in an untrusted process, even trusted libraries can no longer be relied upon to preserve their integrity. This limitation necessitates an architectural separation between sensitive logic and untrusted callers.
+
+We here introduce virtual memory subcontexts: a user-space mechanism for embedding protected functionality into the virtual address space of another process, without relinquishing protection guarantees such as memory safety. Subcontexts are memory snapshots of server processes, stored as image files, which can later be mapped and invoked by client processes.
+
+To support this model, our prototype includes (1) a server-side library for creating subcontexts, (2) a client-side library for mapping and invoking them, and (3) a \textit{matchmaker} component of the client-side library that mediates the client-server relationship and enforces memory protections at runtime.
+
+Our work demonstrates that subcontexts are a viable alternative to shared libraries, enabling post-mortem function reuse with stronger isolation guarantees. However, one unresolved issue concerns symbol resolution when serialization logic is embedded in the server binary—a problem likely rooted in dynamic linker behavior.
+
+Future work includes integration with the kernel to support more robust enforcement, the introduction of concurrency-safe subcontext mappings, and further exploration of low-level linking behavior. Ultimately, virtual memory subcontexts offer a promising path toward modular, memory-safe code reuse in untrusted execution environments.

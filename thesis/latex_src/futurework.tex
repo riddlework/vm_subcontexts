@@ -1,0 +1,45 @@
+\chapter*{FUTURE WORK AND OPEN QUESTIONS}
+\thispagestyle{fancy}
+\addcontentsline{toc}{chapter}{FUTURE WORK AND OPEN QUESTIONS}
+
+The development of our prototype for virtual memory subcontexts left in its wake several open questions and exposed avenues for future exploration. Some directions were constrained by time, while others only became clear through the process of implementation. This section outlines possible technical extensions and one especially unresolved implementation-level puzzle that we encountered during development.
+
+\section*{1. Kernel Integration and Hardware Enforcement}
+\addcontentsline{toc}{section}{Kernel Integration and Hardware Enforcement}
+Currently, our prototype resides entirely in user space. As a result, memory protection depends exclusively on user-level APIs such as \cinline{mprotect}, which are inherently brittle, reactive, and subject to user-space interference. A kernel-level implementation could offer more robust guarantees. By handling subcontext mapping at the kernel level and managing access permissions directly through the page table, we could avoid many of the coordination problems that plague user-space enforcement and boost performance with a more elegant design.
+
+Future work could include the development of a minimal kernel module or the use of existing kernel APIs to intercept and manage page faults during subcontext entry. Ultimately, we imagine a future in which subcontexts become a first-class kernel primitive, similar to memory namespaces or shared memory segments, with native support from the operating system and CPU.
+
+\section*{2. Support for Multi-Threading}
+\addcontentsline{toc}{section}{Support for Multi-Threading}
+Our current implementation is thread-agnostic and assumes a single-threaded execution model. We made no attempt to address concurrency, synchronization, or thread-specific subcontext transitions. However, supporting multi-threaded client processes poses a number of complications. Page permissions in Linux are enforced per-process, not per-thread. As a result, if one thread attempts to enter a subcontext and toggles execute permissions, other threads might simultaneously lose access to their expected code regions.
+
+One possible solution involves thread-local subcontext state, with the matchmaker coordinating transitions on a per-thread basis. However, this may require complex cooperation between signal handlers and thread schedulers. Alternatively, we must ask whether subcontexts are fundamentally serial in nature (i.e., whether only one thread at a time should ever enter a given subcontext) and if so, whether concurrency should even be a target for future development.
+
+\section*{3. Enhanced Image Compression}
+\addcontentsline{toc}{section}{Enhanced Image Compression}
+The current image format is deliberately simple. It captures raw memory segments without any form of compression or optimization. Clients must know function entry offsets in advance and cast function pointers manually. While this simplicity aids debugging and transparency, it misses opportunities for compression, improved safety, and more expressive memory modeling.
+
+Future work could include support for sparse memory layouts, compression of zeroed pages, and exclusion of redundant metadata. These improvements would reduce image size and improve memory utilization. Additionally, the current image files are fixed-size post-serialization. If a subcontext allocates dynamic memory beyond its pre-allocated region, it risks accessing unmapped or unallocated pages—potentially causing segmentation faults or undefined behavior. Future versions could implement flexible image layouts or embedded allocators to support controlled post-mortem heap growth.
+
+\section*{4. ELF Segment and Linking Behavior}
+\addcontentsline{toc}{section}{ELF Segment and Linking Behavior}
+Although our server and client logic currently reside in shared libraries (\cinline{.so} files), our broader goal is to replace or improve upon the shared library model. This raises the question: can we entirely avoid dynamic linking? Future work may involve constructing subcontext binaries as static ELF executables, with embedded serialization metadata, so that clients can load and execute them without depending on runtime-shared objects.
+
+Such an approach would likely require low-level manipulation of ELF headers and custom linking logic. While this would increase binary size and complexity, it would also offer greater control over symbol resolution and eliminate runtime dependencies—making subcontexts more portable, robust, and self-contained.
+
+\section*{5. Developer Tools and Higher-Level Bindings}
+\addcontentsline{toc}{section}{Developer Tools and Higher-Level Bindings}
+Although our prototype demonstrates the basic feasibility of subcontexts, its interface is minimal and assumes a C-style, manual low-level memory management model. In the future, we hope to extend subcontext capabilities to higher-level programming environments through transpilation tools. These could abstract away low-level memory operations and provide safer, language-integrated interfaces for invoking subcontext functionality.
+
+In addition, tooling for debugging and development remains primitive. Visualizing image layout, tracking subcontext transitions, and inspecting memory usage would greatly aid both users and developers. Future work could include interactive introspection tools, symbolic subcontext debuggers, and static analysis pipelines for preparing programs for serialization.
+
+\section*{Open Technical Questions}
+\addcontentsline{toc}{section}{Open Technical Questions}
+One especially persistent technical issue emerged during implementation. Initially, we embedded the serialization logic within the same binary as the server program. After serialization, we found that symbols for functions that had not yet been invoked at runtime failed to resolve when invoked after mapping. In contrast, any function called prior to serialization had its symbol correctly resolved and preserved.
+
+We attempted to resolve this using various linker and loader flags but had no success. The only consistent workaround was to ensure that all functions we wished to serialize were invoked at least once prior to serialization.
+
+Surprisingly, this issue disappeared when we moved the serialization logic into a separate library. When the server merely linked against this external serialization module, the resulting image preserved symbols for all linked functions, even if they were never called.
+
+We suspect this has to do with how linkers and dynamic loaders resolve and record symbols based on usage during static linking and lazy resolution during runtime. However, the exact cause remains unclear. Future work could involve a deeper investigation into the internals of the dynamic linker and symbol resolution mechanisms to determine why embedding serialization logic inside the server binary suppresses unresolved symbols.

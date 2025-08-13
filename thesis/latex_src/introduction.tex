@@ -1,0 +1,30 @@
+\chapter*{INTRODUCTION AND MOTIVATION}
+\thispagestyle{fancy}
+\addcontentsline{toc}{chapter}{INTRODUCTION AND MOTIVATION}
+
+
+A \textit{program} is a set of instructions that will be executed by a computer’s processor. When a program is loaded into memory and given computational resources by the operating system, it becomes a \textit{process}. A process has its own code, stack, heap, registers, and associated metadata.
+
+Before the invention of modern operating systems, computers could run only one program at a time. Programs were loaded into physical memory and executed from start to finish without interruption. The introduction of \textit{time sharing} enabled the appearance of running multiple programs simultaneously. In reality, the CPU rapidly switches between processes, giving each one a brief period of execution known as a \textit{time slice}. When a process is executing, it becomes a \textit{context}, and switching from one context to another (a \textit{context switch}) involves saving the current process’s state and restoring the state of the next.
+
+Managing this illusion for hundreds of concurrent processes would be infeasible without some kind of abstraction. To this end, the operating system provides each process with its own \textit{virtual memory}: an isolated view of memory space in which it appears to be the sole occupant. When a process is scheduled to run, its virtual memory is mapped into physical memory, anchoring the abstraction in reality for the duration of its time slice.
+
+This separation of processes through virtual memory also reflects a deeper architectural constraint: trust boundaries. Shared libraries are ubiquitous In low-level systems programming. Libraries such as \cinline{libc} or \cinline{libm} allow developers to reuse common code across many programs. These libraries are usually trustworthy and are vetted and maintained by the open-source community, but once they are linked into a program, they inherit its protection boundaries. In other words, no matter how trustworthy the library itself may be, it becomes untrusted the moment it becomes embedded inside an untrusted process.
+
+For this reason, any functionality or data that is critical to system integrity—such as filesystems, schedulers, or memory allocators—is typically placed inside the kernel or offloaded to a privileged service daemon. This ensures that shared state and sensitive logic remain outside the reach (and often the view) of potentially malicious user programs.
+
+Still, this architectural separation imposes costs such as context switches, syscall overhead, and a rigid division between kernel-space authority and user-space agency. But what if we flipped this paradigm? That is, would it be possible to bring some of this trusted logic \textit{into} untrusted processes without sacrificing protection? Microkernel systems already allow us to isolate services into separate processes, but can we go further? Is it possible to embed trusted logic inside the virtual memory space of a client process, without letting that client corrupt or subvert it?
+
+This is the guiding question behind our exploration of \textit{virtual memory subcontexts}.
+
+A \textit{subcontext} is a context within a context: a self-contained region of memory residing within the virtual address space of a host process. Like a traditional context, it contains code and data necessary for execution. Unlike a traditional process, it does not require CPU scheduling or context switching. Instead, the client process can directly invoke functionality from a subcontext through memory-mapped invocation, while the memory of the subcontext remains protected from modification.
+
+The core insight of subcontexts is twofold. First, modern processes typically leave vast regions of their virtual address space unused. We can safely fill these holes with data—so long as the client never accesses them directly. Second, if two processes have disjoint virtual memory layouts, they can be \textit{conceptually co-located} inside the same address space, each mapped into the other’s unused regions. So long as each only accesses its own addresses, they remain unaware of one another. This condition can be enforced by the operating system through page-level permissions: by simply not mapping the pages of one into the page table of the other, isolation is maintained.
+
+Our work explores what becomes possible when these limitations are relaxed—when we allow one process to selectively map and invoke code residing in another’s memory image. In particular, we explore asymmetric access relationships, where a client can execute code or read data from a server-subcontext, while the subcontext remains shielded from client-side interference.
+
+Practically, a subcontext is created when a process—called a \textit{server process}—serializes its memory into an \textit{image file}. This file snapshots the process' state at a specific moment, including code, data, and function pointers. Once this snapshot is taken, the server process terminates. A client process can later map this image into its own virtual memory and invoke functionality at well-defined entry points—executing code from a defunct process without dynamic linking.
+
+This project began as a conceptual sketch—an idea not yet fully realized, perhaps not even fully formed in the mind of its originator. My involvement began with an in-depth discussion with my advisor, who outlined the motivating intuitions behind the design. What follows is my attempt to understand, clarify, and implement those ideas—to shape an initial vision into a coherent system through the act of building it.
+
+Our prototype explores this model entirely in user space, using existing OS abstractions such as memory mapping and serialization. Though our current implementation makes compromises—lacking CPU enforcement and true kernel-level awareness—it gestures toward a broader architectural vision. In that future, processes could safely host invocable subcontexts within their own address spaces, enabling a new class of modular, efficient, and protected execution.
